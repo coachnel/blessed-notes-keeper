@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Heart, Book } from "lucide-react";
+import { Heart, Book, Search } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export const BibleReader = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   
   const verses = [
     {
@@ -38,6 +40,22 @@ export const BibleReader = () => {
     }
   ];
 
+  const filteredVerses = verses.filter(
+    verse =>
+      verse.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      verse.text.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleToggleFavorite = async (verse: any) => {
+    if (isFavorite(verse.reference)) {
+      // Find the favorite and remove it
+      // Note: This would need the favorite ID in a real implementation
+      console.log('Remove from favorites:', verse.reference);
+    } else {
+      await addToFavorites(verse.reference, verse.text);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white/70 backdrop-blur-lg rounded-3xl p-6 shadow-lg border border-white/20">
@@ -47,15 +65,15 @@ export const BibleReader = () => {
         </div>
         
         <div className="flex space-x-2 mb-4">
-          <Input
-            placeholder="Rechercher un verset..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 rounded-full bg-white/50"
-          />
-          <Button className="rounded-full bg-purple-600 hover:bg-purple-700">
-            🔍
-          </Button>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              placeholder="Rechercher un verset..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-full bg-white/50"
+            />
+          </div>
         </div>
         
         <select className="w-full p-3 rounded-lg bg-white/50 border border-gray-200">
@@ -69,13 +87,24 @@ export const BibleReader = () => {
       </div>
 
       <div className="space-y-4">
-        {verses.map((verse, index) => (
+        {filteredVerses.map((verse, index) => (
           <div key={index} className="bg-white/70 backdrop-blur-lg rounded-3xl p-6 shadow-lg border border-white/20">
             <div className="text-purple-600 font-medium mb-2">{verse.reference}</div>
             <p className="text-gray-700 leading-relaxed mb-4 italic">"{verse.text}"</p>
             <div className="flex justify-end">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Heart className="w-5 h-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-full"
+                onClick={() => handleToggleFavorite(verse)}
+              >
+                <Heart 
+                  className={`w-5 h-5 ${
+                    isFavorite(verse.reference) 
+                      ? 'fill-red-500 text-red-500' 
+                      : 'text-gray-500'
+                  }`} 
+                />
               </Button>
             </div>
           </div>

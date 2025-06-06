@@ -1,23 +1,53 @@
 
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useNotes } from "@/hooks/useNotes";
+import { useFavorites } from "@/hooks/useFavorites";
+import { LogOut } from "lucide-react";
+
 export const ProfilePage = () => {
+  const { user, signOut } = useAuth();
+  const { notes } = useNotes();
+  const { favorites } = useFavorites();
+
+  const getUserName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return "Utilisateur";
+  };
+
   const stats = [
     { count: 0, label: "Versets lus", icon: "📖" },
-    { count: 0, label: "Favoris", icon: "❤️" },
+    { count: favorites.length, label: "Favoris", icon: "❤️" },
     { count: 1, label: "Jours actifs", icon: "📅" },
-    { count: 0, label: "Notes écrites", icon: "📝" }
+    { count: notes.length, label: "Notes écrites", icon: "📝" }
   ];
 
   return (
     <div className="space-y-6">
       <div className="bg-white/70 backdrop-blur-lg rounded-3xl p-6 shadow-lg border border-white/20">
-        <div className="flex items-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
-            <span className="text-2xl text-white">👤</span>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
+              <span className="text-2xl text-white">👤</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">{getUserName()}</h2>
+              <p className="text-gray-600">{user?.email}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold">Utilisateur</h2>
-            <p className="text-gray-600">Membre depuis aujourd'hui</p>
-          </div>
+          <Button
+            onClick={signOut}
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
