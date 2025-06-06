@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Book, Heart, Notes } from "lucide-react";
+import { Book, Heart, FileText } from "lucide-react";
 
 interface BottomNavigationProps {
   currentTab: string;
@@ -11,7 +11,7 @@ export const BottomNavigation = ({ currentTab, onTabChange }: BottomNavigationPr
   const tabs = [
     { id: "home", label: "Accueil", icon: "📱" },
     { id: "bible", label: "Bible", icon: <Book className="w-5 h-5" /> },
-    { id: "notes", label: "Notes", icon: <Notes className="w-5 h-5" /> },
+    { id: "notes", label: "Notes", icon: <FileText className="w-5 h-5" /> },
     { id: "profile", label: "Profil", icon: "👤" }
   ];
 

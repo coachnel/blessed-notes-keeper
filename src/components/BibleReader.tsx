@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, Book } from "lucide-react";
 
 export const BibleReader = () => {
   const [searchQuery, setSearchQuery] = useState("");

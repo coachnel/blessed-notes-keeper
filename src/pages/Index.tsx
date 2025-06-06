@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Bell, Book, Heart, Notes } from "lucide-react";
+import { Bell, Book, Heart, FileText } from "lucide-react";
 import { WelcomeSection } from "@/components/WelcomeSection";
 import { DailyVerse } from "@/components/DailyVerse";
 import { PrayerReminders } from "@/components/PrayerReminders";

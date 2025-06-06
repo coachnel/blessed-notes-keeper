@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Notes } from "lucide-react";
+import { FileText } from "lucide-react";
 
 export const NotesJournal = () => {
   return (
