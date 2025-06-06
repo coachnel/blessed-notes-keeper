@@ -11,6 +11,13 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   base: './',
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
