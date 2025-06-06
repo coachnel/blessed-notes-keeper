@@ -1,6 +1,7 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/manifest.webmanifest", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
   "outputDirectory": "dist"
