@@ -1,0 +1,16 @@
+{
+  "name": "Blessed Notes Keeper",
+  "short_name": "BlessedNotes",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7c3aed",
+  "description": "Application chrétienne mobile-first de notes, Bible et rappels.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

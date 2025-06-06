@@ -1,60 +1,54 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Heart, Book, Search } from "lucide-react";
+import { Heart, Book, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
+import { LSG_BIBLE } from "@/lib/lsg-bible";
 
 export const BibleReader = () => {
+  const { addToFavorites, removeFromFavorites, isFavorite, favorites } = useFavorites();
+  const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
-  
-  const verses = [
-    {
-      reference: "Jean 3:16",
-      text: "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle."
-    },
-    {
-      reference: "Philippiens 4:13",
-      text: "Je puis tout par celui qui me fortifie."
-    },
-    {
-      reference: "Psaumes 23:1",
-      text: "L'Éternel est mon berger: je ne manquerai de rien."
-    },
-    {
-      reference: "Proverbes 3:5",
-      text: "Confie-toi en l'Éternel de tout ton cœur, Et ne t'appuie pas sur ta sagesse."
-    },
-    {
-      reference: "Matthieu 6:33",
-      text: "Cherchez premièrement le royaume et la justice de Dieu; et toutes ces choses vous seront données par-dessus."
-    },
-    {
-      reference: "Romains 8:28",
-      text: "Nous savons, du reste, que toutes choses concourent au bien de ceux qui aiment Dieu, de ceux qui sont appelés selon son dessein."
-    },
-    {
-      reference: "Ésaïe 40:31",
-      text: "Mais ceux qui se confient en l'Éternel renouvellent leur force. Ils prennent le vol comme les aigles; Ils courent, et ne se lassent point, Ils marchent, et ne se fatiguent point."
-    }
-  ];
 
-  const filteredVerses = verses.filter(
-    verse =>
-      verse.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      verse.text.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Liste des livres
+  const books = Object.keys(LSG_BIBLE);
+  const chapters = selectedBook ? Object.keys(LSG_BIBLE[selectedBook]) : [];
+  const verses = selectedBook && selectedChapter ? LSG_BIBLE[selectedBook][selectedChapter] : null;
 
-  const handleToggleFavorite = async (verse: any) => {
-    if (isFavorite(verse.reference)) {
-      // Find the favorite and remove it
-      // Note: This would need the favorite ID in a real implementation
-      console.log('Remove from favorites:', verse.reference);
+  // Navigation entre chapitres
+  const goToPrevChapter = () => {
+    if (!selectedBook || !selectedChapter) return;
+    const idx = chapters.indexOf(selectedChapter);
+    if (idx > 0) setSelectedChapter(chapters[idx - 1]);
+  };
+  const goToNextChapter = () => {
+    if (!selectedBook || !selectedChapter) return;
+    const idx = chapters.indexOf(selectedChapter);
+    if (idx < chapters.length - 1) setSelectedChapter(chapters[idx + 1]);
+  };
+
+  // Favoris
+  const handleToggleFavorite = async (verseNum: string, verseText: string) => {
+    const ref = `${selectedBook} ${selectedChapter}:${verseNum}`;
+    if (isFavorite(ref)) {
+      const favorite = favorites.find(fav => fav.verse_reference === ref);
+      if (favorite) await removeFromFavorites(favorite.id);
     } else {
-      await addToFavorites(verse.reference, verse.text);
+      await addToFavorites(ref, verseText);
     }
   };
+
+  // Recherche sur les versets du chapitre sélectionné
+  let displayedVerses: [string, string][] = [];
+  if (verses) {
+    displayedVerses = Object.entries(verses)
+      .filter(([num, text]) =>
+        `${selectedBook} ${selectedChapter}:${num}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(text).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .map(([num, text]) => [num, String(text)]);
+  }
 
   return (
     <div className="space-y-6">
@@ -63,52 +57,65 @@ export const BibleReader = () => {
           <Book className="w-5 h-5 mr-2" />
           <h1 className="text-xl font-semibold">Lecture de la Bible</h1>
         </div>
-        
         <div className="flex space-x-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               placeholder="Rechercher un verset..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="pl-10 rounded-full bg-white/50"
             />
           </div>
         </div>
-        
-        <select className="w-full p-3 rounded-lg bg-white/50 border border-gray-200">
-          <option>Choisir un livre...</option>
-          <option>Genèse</option>
-          <option>Exode</option>
-          <option>Matthieu</option>
-          <option>Jean</option>
-          <option>Romains</option>
-        </select>
-      </div>
-
-      <div className="space-y-4">
-        {filteredVerses.map((verse, index) => (
-          <div key={index} className="bg-white/70 backdrop-blur-lg rounded-3xl p-6 shadow-lg border border-white/20">
-            <div className="text-purple-600 font-medium mb-2">{verse.reference}</div>
-            <p className="text-gray-700 leading-relaxed mb-4 italic">"{verse.text}"</p>
-            <div className="flex justify-end">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-full"
-                onClick={() => handleToggleFavorite(verse)}
-              >
-                <Heart 
-                  className={`w-5 h-5 ${
-                    isFavorite(verse.reference) 
-                      ? 'fill-red-500 text-red-500' 
-                      : 'text-gray-500'
-                  }`} 
-                />
-              </Button>
+        {!selectedBook ? (
+          <select
+            className="w-full p-3 rounded-lg bg-white/50 border border-gray-200"
+            onChange={e => setSelectedBook(e.target.value)}
+            value={selectedBook || ''}
+          >
+            <option value="">Choisir un livre...</option>
+            {books.map(book => (
+              <option key={book} value={book}>{book}</option>
+            ))}
+          </select>
+        ) : !selectedChapter ? (
+          <div className="flex flex-wrap gap-2">
+            {chapters.map(chap => (
+              <Button key={chap} onClick={() => setSelectedChapter(chap)}>{chap}</Button>
+            ))}
+            <Button variant="ghost" onClick={() => setSelectedBook(null)}><ChevronLeft /> Livres</Button>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Button variant="ghost" onClick={() => setSelectedChapter(null)}><ChevronLeft /> Chapitres</Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={goToPrevChapter} disabled={chapters.indexOf(selectedChapter) === 0}><ChevronLeft /></Button>
+                <span>Chapitre {selectedChapter}</span>
+                <Button variant="ghost" onClick={goToNextChapter} disabled={chapters.indexOf(selectedChapter) === chapters.length - 1}><ChevronRight /></Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {displayedVerses.map(([num, text]) => (
+                <div key={num} className="flex items-center justify-between border-b py-2">
+                  <div>
+                    <span className="text-purple-600 font-medium">{num}</span>
+                    <span className="ml-2 text-gray-700 italic">{String(text)}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={() => handleToggleFavorite(num, text as string)}
+                  >
+                    <Heart className={`w-5 h-5 ${isFavorite(`${selectedBook} ${selectedChapter}:${num}`) ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
